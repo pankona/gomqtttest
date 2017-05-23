@@ -66,7 +66,9 @@ func NewTLSConfig() *tls.Config {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println(cert.Leaf)
+	// fmt.Println(cert.Leaf)
+	fmt.Println(cert.Leaf.Subject.CommonName)
+	// cert := tlsconfig.PeerCertificates[0]
 
 	// Create tls.Config with desired tls properties
 	return &tls.Config{
@@ -88,7 +90,6 @@ func NewTLSConfig() *tls.Config {
 
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	go func() {
-		time.Sleep(5 * time.Second)
 		fmt.Printf("TOPIC: %s\n", msg.Topic())
 		fmt.Printf("MSG: %s\n", msg.Payload())
 	}()
@@ -99,7 +100,8 @@ func main() {
 
 	opts := MQTT.NewClientOptions()
 	opts.AddBroker("ssl://localhost:8883")
-	opts.SetClientID("ssl-sample").SetTLSConfig(tlsconfig)
+	clientID := tlsconfig.Certificates[0].Leaf.Subject.CommonName
+	opts.SetClientID(clientID).SetTLSConfig(tlsconfig)
 	opts.SetDefaultPublishHandler(f)
 
 	// Start the connection
@@ -108,7 +110,10 @@ func main() {
 		panic(token.Error())
 	}
 
+	c.Subscribe("/status/akatsuka", 0, nil)
+	c.Subscribe("/connecting/all", 0, nil)
 	c.Subscribe("/go-mqtt/sample", 0, nil)
+	c.Subscribe("$SYS/broker/clients/connected", 0, nil)
 
 	i := 0
 	for _ = range time.Tick(time.Duration(1) * time.Second) {
@@ -119,6 +124,8 @@ func main() {
 		c.Publish("/go-mqtt/sample", 0, false, text)
 		i++
 	}
+	text := fmt.Sprintf("{\"name\":\"%s\"}", clientID)
+	c.Publish("/connecting/all", 0, false, text)
 
 	time.Sleep(30 * time.Second)
 
