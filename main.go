@@ -50,7 +50,7 @@ func NewTLSConfig() *tls.Config {
 	// Alternatively, manually add CA certificates to
 	// default openssl CA bundle.
 	certpool := x509.NewCertPool()
-	pemCerts, err := ioutil.ReadFile("samplecerts/CAfile.pem")
+	pemCerts, err := ioutil.ReadFile("mosquitto_config/ca.crt")
 	if err == nil {
 		certpool.AppendCertsFromPEM(pemCerts)
 	}
@@ -67,7 +67,7 @@ func NewTLSConfig() *tls.Config {
 		panic(err)
 	}
 	// fmt.Println(cert.Leaf)
-	fmt.Println(cert.Leaf.Subject.CommonName)
+	fmt.Println("cert.Leaf.Subject.CommonName =", cert.Leaf.Subject.CommonName)
 	// cert := tlsconfig.PeerCertificates[0]
 
 	// Create tls.Config with desired tls properties
@@ -82,7 +82,7 @@ func NewTLSConfig() *tls.Config {
 		ClientCAs: nil,
 		// InsecureSkipVerify = verify that cert contents
 		// match server. IP matches what is in cert etc.
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: false,
 		// Certificates = list of certs client sends to server.
 		Certificates: []tls.Certificate{cert},
 	}
