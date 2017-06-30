@@ -56,7 +56,7 @@ func NewTLSConfig() *tls.Config {
 	}
 
 	// Import client certificate/key pair
-	cert, err := tls.LoadX509KeyPair("samplecerts/akatsuka.crt", "samplecerts/akatsuka.key")
+	cert, err := tls.LoadX509KeyPair("samplecerts/test.crt", "samplecerts/test.key")
 	if err != nil {
 		panic(err)
 	}
